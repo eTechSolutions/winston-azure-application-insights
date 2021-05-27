@@ -1,9 +1,8 @@
 'use strict';
 
-
 const { assert } = require('chai');
 const sinon = require('sinon');
-const { createLogger, format, config } = require('winston');
+const { createLogger, config } = require('winston');
 const appInsights = require('applicationinsights');
 const transport = require('../lib/winston-azure-application-insights');
 
@@ -108,6 +107,7 @@ describe('winston-azure-application-insights', () => {
             beforeEach(() => {
                 aiTransport = new transport.AzureApplicationInsightsLogger({ key: 'FAKEKEY' });
                 logger = createLogger({
+                    levels: config.syslog.levels,
                     transports: [aiTransport],
                 });
                 clientMock = sinon.mock(appInsights.defaultClient);
@@ -159,6 +159,80 @@ describe('winston-azure-application-insights', () => {
                 [customObj, date]
                     .forEach((message) => logger.log('debug', message));
             });
+
+            it('should trace with a single param', () => {
+                const msg = 'Trace msg';
+
+                const props = {
+                    propBag: true,
+                };
+
+                const testLogger = logger.child(props);
+
+                clientMock.expects('trackTrace').once().withArgs({
+                    message: msg,
+                    severity: 1,
+                    properties: props,
+                });
+
+                testLogger.info(msg);
+
+                clientMock.verify();
+            });
+
+            it('should trace with supplied property bag', () => {
+                const msg = 'Trace msg';
+
+                const props = {
+                    propBag: true,
+                };
+
+                const extraProps = {
+                    foo: 'bar',
+                };
+
+                const testLogger = logger.child(props);
+
+                clientMock.expects('trackTrace').once().withArgs({
+                    message: msg,
+                    severity: 1,
+                    properties: {
+                        propBag: true,
+                        foo: 'bar',
+                    },
+                });
+
+                testLogger.info(msg, extraProps);
+
+                clientMock.verify();
+            });
+
+            it('should trace with log object', () => {
+                const msg = 'Trace msg';
+
+                const props = {
+                    propBag: true,
+                };
+
+                const testLogger = logger.child(props);
+
+                clientMock.expects('trackTrace').once().withArgs({
+                    message: msg,
+                    severity: 1,
+                    properties: {
+                        propBag: true,
+                        foo: 'bar',
+                    },
+                });
+
+                testLogger.log({
+                    level: 'info',
+                    message: msg,
+                    foo: 'bar',
+                });
+
+                clientMock.verify();
+            });
         });
 
         describe('#log errors as exceptions', () => {
@@ -185,7 +259,7 @@ describe('winston-azure-application-insights', () => {
             it('should not track exceptions if the option is off', () => {
                 aiTransport.sendErrorsAsExceptions = false;
                 clientMock.expects('trackException').never();
-                logger.error('error message');
+                logger.error(new Error('error message'));
             });
 
             it('should not track exceptions if level < error', () => {
@@ -208,26 +282,58 @@ describe('winston-azure-application-insights', () => {
 
             it('should track exceptions if level == error and msg is an Error obj', () => {
                 const error = new Error('error msg');
-                const expectedCall = clientMock.expects('trackException');
 
-                expectedCall.once().withArgs({
-                    exception: error,
-                    properties: {},
+                const props = {
+                    propBag: true,
+                };
+
+                const testLogger = logger.child(props);
+
+                clientMock.expects('trackException').once().withArgs({
+                    exception: sinon.match.instanceOf(Error).and(sinon.match.has('message', error.message)).and(sinon.match.has('stack', error.stack)),
+                    properties: props,
                 });
-                logger.error(error);
+
+                clientMock.expects('trackTrace').once().withArgs({
+                    message: error.message,
+                    severity: 3,
+                    properties: {
+                        propBag: true,
+                        stack: error.stack,
+                    },
+                });
+
+                testLogger.error(error);
+
                 clientMock.verify();
             });
 
             it('should track exceptions if level == error and meta is an Error obj', () => {
+                const logMessage = 'Log handling message';
                 const error = new Error('Error message');
-                const expectedCall = clientMock.expects('trackException');
-                expectedCall.once().withArgs({
-                    exception: error,
+
+                const props = {
+                    propBag: true,
+                };
+
+                const testLogger = logger.child(props);
+
+                clientMock.expects('trackException').once().withArgs({
+                    exception: sinon.match.instanceOf(Error).and(sinon.match.has('message', `${logMessage} ${error.message}`)).and(sinon.match.has('stack', error.stack)),
+                    properties: props,
+                });
+
+                clientMock.expects('trackTrace').once().withArgs({
+                    message: `${logMessage} ${error.message}`,
+                    severity: 3,
                     properties: {
-                        message: 'Log handling message',
+                        propBag: true,
+                        stack: error.stack,
                     },
                 });
-                logger.error('Log handling message', error);
+
+
+                testLogger.error(logMessage, error);
                 clientMock.verify();
             });
 
@@ -235,161 +341,36 @@ describe('winston-azure-application-insights', () => {
                 const logContext = {
                     propBag: true,
                 };
+
+                const extraProps = {
+                    foo: 'bar',
+                };
+
                 const error = new Error('Error message');
+
+                const testLogger = logger.child(extraProps);
+
                 clientMock.expects('trackException').once().withArgs({
-                    exception: error,
+                    exception: sinon.match.instanceOf(Error).and(sinon.match.has('message', error.message)).and(sinon.match.has('stack', error.stack)),
                     properties: {
                         propBag: true,
+                        foo: 'bar',
                     },
                 });
+
                 clientMock.expects('trackTrace').once().withArgs({
-                    message: error.toString(),
+                    message: String(error),
                     severity: 3,
                     properties: {
-                        message: error.message,
                         propBag: true,
+                        foo: 'bar',
                     },
                 });
-                logger.error(error, logContext);
+
+                testLogger.error(error, logContext);
+
                 clientMock.verify();
             });
-        });
-
-        describe('#formatter properties', () => {
-            let logger;
-            let aiTransport;
-            let clientMock;
-            const TEST_EXTRA_INFO = {
-                my_app_version: '1.0.0-testsuite',
-            };
-            const addTestAppVersions = format((info) => {
-                return Object.assign(info, TEST_EXTRA_INFO);
-            });
-
-            beforeEach(() => {
-                aiTransport = new transport.AzureApplicationInsightsLogger({
-                    key: 'FAKEKEY',
-                });
-                logger = createLogger({
-                    transports: [aiTransport],
-                    format: format.combine(addTestAppVersions(), format.json()),
-                });
-                clientMock = sinon.mock(aiTransport.client);
-            });
-
-            afterEach(() => {
-                clientMock.restore();
-            });
-
-            it('appends my_app_version to the trace properties', () => {
-                clientMock.expects('trackTrace').once().withArgs({
-                    message: 'Test message',
-                    severity: 1,
-                    properties: TEST_EXTRA_INFO,
-                });
-                logger.info('Test message');
-            });
-
-            it('appends my_app_version to existing logMeta', () => {
-                clientMock.expects('trackTrace').once().withArgs({
-                    message: 'Test message',
-                    severity: 1,
-                    properties: Object.assign(TEST_EXTRA_INFO, { propBag: true }),
-                });
-                logger.info('Test message', { propBag: true });
-            });
-
-            it('appends my_app_version to extracted error properties', () => {
-                const error = new Error('Test error');
-                clientMock.expects('trackTrace').once().withArgs({
-                    message: error.message,
-                    severity: 3,
-                    properties: Object.assign(TEST_EXTRA_INFO, { message: error.message }),
-                });
-                logger.error('Test message', error);
-            });
-        });
-    });
-
-    describe('winston', () => {
-        class ExtendedError extends Error {
-            constructor(message, arg1, arg2) {
-                super(message);
-                this.name = 'ExtendedError';
-                this.arg1 = arg1;
-                this.arg2 = arg2;
-            }
-        }
-
-        let winstonLogger;
-        let clientMock;
-        let expectTrace;
-
-        beforeEach(() => {
-            const freshClient = new appInsights.TelemetryClient('FAKEKEY');
-            winstonLogger = createLogger({
-                transports: [new transport.AzureApplicationInsightsLogger({ client: freshClient })],
-            });
-            clientMock = sinon.mock(freshClient);
-            expectTrace = clientMock.expects('trackTrace');
-        });
-
-        afterEach(() => {
-            clientMock.restore();
-        });
-
-        it('converts .log(level, string, object) to a trackTrace', () => {
-            const logMessage = 'some log text...';
-            const logLevel = 'error';
-            const logMeta = {
-                message: 'some meta text',
-                value: 42,
-            };
-
-            expectTrace.once();
-
-            winstonLogger.log(logLevel, logMessage, logMeta);
-
-            const traceArg = expectTrace.args[0][0];
-
-            assert.equal(traceArg.message, logMessage);
-            assert.equal(traceArg.severity, 3);
-            assert.deepEqual(traceArg.properties, logMeta);
-        });
-
-        it('converts .error(Error) to a useful trace', () => {
-            const error = new ExtendedError('errormessage', 'arg1', 'arg2');
-
-            expectTrace.once().withArgs({
-                message: error.message,
-                severity: 3,
-                properties: {
-                    level: 'error',
-                    arg1: error.arg1,
-                    arg2: error.arg2,
-                    name: error.name,
-                    message: error.message,
-                },
-            });
-
-            winstonLogger.error(error);
-        });
-
-        it('converts .error(string, Error) to a useful trace', () => {
-            const logMessage = 'Encountered an exception here';
-            const error = new ExtendedError('Detailed error', 'problem', 'here');
-
-            expectTrace.once().withArgs({
-                message: logMessage,
-                severity: 3,
-                properties: {
-                    message: error.message,
-                    name: error.name,
-                    arg1: error.arg1,
-                    arg2: error.arg2,
-                },
-            });
-            winstonLogger.error(logMessage, error);
         });
     });
 

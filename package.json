@@ -1,6 +1,6 @@
 {
-  "name": "winston-azure-application-insights",
-  "version": "3.0.0",
+  "name": "winston-application-insights",
+  "version": "4.0.0",
   "description": "Azure Application Insights transport for Winston",
   "main": "./lib/winston-azure-application-insights.js",
   "engines": {
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/willmorgan/winston-azure-application-insights.git"
+    "url": "https://github.com/etechsolutions/winston-azure-application-insights.git"
   },
   "keywords": [
     "winston",
@@ -34,6 +34,10 @@
       "name": "Will Morgan",
       "email": "jobs+npm@willmorgan.co.uk",
       "url": "http://willmorgan.co.uk"
+    },
+    {
+      "name": "Tom Glenn",
+      "email": "tomglenn@etech.net"
     }
   ],
   "license": "MIT",
@@ -52,9 +56,9 @@
     "winston": "^3.2.0"
   },
   "bugs": {
-    "url": "https://github.com/willmorgan/winston-azure-application-insights/issues"
+    "url": "https://github.com/etechsolutions/winston-azure-application-insights/issues"
   },
-  "homepage": "https://github.com/willmorgan/winston-azure-application-insights#readme",
+  "homepage": "https://github.com/etechsolutions/winston-azure-application-insights#readme",
   "dependencies": {
     "winston-transport": "^4.2.0"
   }

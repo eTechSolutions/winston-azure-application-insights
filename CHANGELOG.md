@@ -16,3 +16,15 @@
 
 ## Enhancements
 * Allow `log` to take `null` or `undefined` message parameters.
+
+
+# 4.0.0
+
+## Breaking Changes
+
+* **Now requires Winston 3.2**
+
+## Enhancements
+* Support for the new `child` log context, ensuring any properties in this context is passed to Application Insights.
+* Supports new winston input format from `log`.
+
