@@ -4,17 +4,17 @@ on:
         branches:
           - jgrant95-patch-1
 jobs:
-    build:
+    publish-to-azure-deveops-npm:
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v2
-        - uses: ponicode/azure-devops-npm-action@master
+        - uses: ponicode/azure-devops-npm-action@1.0.0
           with:
               organisation: jgrant95-2
               registry: https://pkgs.dev.azure.com/jgrant95-2/_packaging/jgrant95-2/npm/registry/
               user: jongrant@corelogic.com
               email: jongrant@corelogic.com
-              password: emd2bzY1ZHRzdXB1Z3g1Mmh3ejN0Znl1aGp2bHBzZndjNng3a2RjeDNvbHk2c3BpbHJycQ==
+              password: bnRwbXVremJtdXNjMnBkaXBsaXRneWdmdXo1bHdkaGw3czVpNGpvb3liNDZ2NjY2cGZkcQ==
         - run: cp `pwd`/.npmrc ~ # We need the .npmrc file in the $HOME directory
         - name: Install dependencies
           run: npm install
