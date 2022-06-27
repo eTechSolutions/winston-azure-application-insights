@@ -13,7 +13,7 @@ jobs:
               registry: https://pkgs.dev.azure.com/jgrant95-2/_packaging/jgrant95-2/npm/registry/
               user: jongrant@corelogic.com
               email: jongrant@corelogic.com
-              password: ${{ secrets.AZURE_TOKEN }}
+              password: emd2bzY1ZHRzdXB1Z3g1Mmh3ejN0Znl1aGp2bHBzZndjNng3a2RjeDNvbHk2c3BpbHJycQ==
         - run: cp `pwd`/.npmrc ~ # We need the .npmrc file in the $HOME directory
         - name: Install dependencies
           run: npm install
