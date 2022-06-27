@@ -12,7 +12,7 @@ Your logging interface can remain familiar to standard (`logger.info`, `logger.e
 This library intends to be compatible with `applicationinsights` `1.0` and Winston `3.x`. If you are using older versions of these libraries, see the `1.x` releases.
 
 It works best with `applicationinsights@~1.0.6` due to improved trace property handling.
-
+fdffdfdf
 **[Read the project changelog](./CHANGELOG.md)**  
 12
 ## Installation
