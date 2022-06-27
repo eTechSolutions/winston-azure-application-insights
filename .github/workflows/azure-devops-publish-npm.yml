@@ -17,7 +17,7 @@ jobs:
               password: bnRwbXVremJtdXNjMnBkaXBsaXRneWdmdXo1bHdkaGw3czVpNGpvb3liNDZ2NjY2cGZkcQ==
         - run: cp `pwd`/.npmrc ~ # We need the .npmrc file in the $HOME directory
         - name: Install dependencies
-          run: npm install
+          run: npm ci
         - name: Test
           run: Test
         - name: Publish to Azure
