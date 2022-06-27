@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: innerspacetrainings/azure-npm-publish@master
+      - uses: innerspacetrainings/azure-npm-publish@v1.0.1
         with:
           npm-email: 'jongrant@corelogic.com'
           organization: 'jgrant95-2'
