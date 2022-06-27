@@ -11,7 +11,7 @@ jobs:
         - uses: ponicode/azure-devops-npm-action@1.0.0
           with:
               organisation: jgrant95-2
-              registry: jgrant95-2/npm/registry/
+              registry: jgrant95-2
               user: jgrant95-2
               email: jongrant@corelogic.com
               password: bnRwbXVremJtdXNjMnBkaXBsaXRneWdmdXo1bHdkaGw3czVpNGpvb3liNDZ2NjY2cGZkcQ==
