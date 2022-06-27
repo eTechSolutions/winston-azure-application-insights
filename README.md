@@ -14,7 +14,7 @@ This library intends to be compatible with `applicationinsights` `1.0` and Winst
 It works best with `applicationinsights@~1.0.6` due to improved trace property handling.
 
 **[Read the project changelog](./CHANGELOG.md)**  
-1
+12
 ## Installation
 
 You'll need the following packages as peer dependencies; install and update them in your requiring project:
