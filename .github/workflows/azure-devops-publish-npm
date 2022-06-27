@@ -1,0 +1,23 @@
+name: Publish on Azure NPM registry
+on:
+    push:
+        branches: [develop]
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v2
+        - uses: ponicode/azure-devops-npm-action@master
+          with:
+              organisation: jgrant95-2
+              registry: https://pkgs.dev.azure.com/jgrant95-2/_packaging/jgrant95-2/npm/registry/
+              user: jongrant@corelogic.com
+              email: jongrant@corelogic.com
+              password: ${{ secrets.AZURE_TOKEN }}
+        - run: cp `pwd`/.npmrc ~ # We need the .npmrc file in the $HOME directory
+        - name: Install dependencies
+          run: npm install
+        - name: Build
+          run: npm run build
+        - name: Publish to Azure
+          run: npm publish
