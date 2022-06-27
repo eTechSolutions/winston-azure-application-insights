@@ -1,19 +1,20 @@
-name: Azure Publish
-
+name: Publish on Azure NPM registry
 on:
     push:
         branches:
           - jgrant95-patch-1
-
 jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: innerspacetrainings/azure-npm-publish@v1.0.1
-        with:
-          npm-email: 'jongrant@corelogic.com'
-          organization: 'jgrant95-2'
-          feed: 'jgrant95-2'
-          username: 'jon grant'
-          base64-token: bnRwbXVremJtdXNjMnBkaXBsaXRneWdmdXo1bHdkaGw3czVpNGpvb3liNDZ2NjY2cGZkcQ==
+    publish-to-azure-deveops-npm:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v2
+        - uses: ponicode/azure-devops-npm-action@1.0.0
+          with:
+              organisation: jgrant95-2
+              registry: jgrant95-2
+              user: jgrant95-2
+              email: jongrant@corelogic.com
+              password: bnRwbXVremJtdXNjMnBkaXBsaXRneWdmdXo1bHdkaGw3czVpNGpvb3liNDZ2NjY2cGZkcQ==
+        - run: cp `pwd`/.npmrc ~ # We need the .npmrc file in the $HOME directory
+        - name: Publish to Azure
+          run: npm publish
