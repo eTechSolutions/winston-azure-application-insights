@@ -328,7 +328,7 @@ describe('winston-azure-application-insights', () => {
                     severity: 3,
                     properties: {
                         propBag: true,
-                        stack: error.stack,
+                        stack: error.stack
                     },
                 });
 
