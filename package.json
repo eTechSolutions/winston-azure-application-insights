@@ -4,7 +4,7 @@
   "description": "Azure Application Insights transport for Winston",
   "main": "./lib/winston-azure-application-insights.js",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=14.0.0"
   },
   "directories": {
     "test": "test"
